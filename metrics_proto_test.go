@@ -17,11 +17,13 @@ package stackdriver
 import (
 	"context"
 	"fmt"
+	"math"
 	"strings"
 	"testing"
 
 	resourcepb "github.com/census-instrumentation/opencensus-proto/gen-go/resource/v1"
 	"github.com/golang/protobuf/ptypes/timestamp"
+	promvalue "github.com/prometheus/prometheus/pkg/value"
 	"google.golang.org/api/option"
 	distributionpb "google.golang.org/genproto/googleapis/api/distribution"
 	labelpb "google.golang.org/genproto/googleapis/api/label"
@@ -760,6 +762,20 @@ func TestProtoMetricsToMonitoringMetrics_fromProtoPoint(t *testing.T) {
 					Value: &monitoringpb.TypedValue_Int64Value{Int64Value: 17},
 				},
 			},
+		},
+		{
+			in: &metricspb.Point{
+				Timestamp: endTimestamp,
+				Value:     &metricspb.Point_Int64Value{Int64Value: int64(math.Float64frombits(promvalue.StaleNaN))},
+			},
+			want: nil,
+		},
+		{
+			in: &metricspb.Point{
+				Timestamp: endTimestamp,
+				Value:     &metricspb.Point_DoubleValue{DoubleValue: math.Float64frombits(promvalue.StaleNaN)},
+			},
+			want: nil,
 		},
 	}
 
